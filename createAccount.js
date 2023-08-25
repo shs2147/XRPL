@@ -1,21 +1,17 @@
-const RippleAPI = require("ripple-lib").RippleAPI;
+const keypairs = require("ripple-keypairs");
+const rippleBinaryCodec = require("ripple-binary-codec");
 
-async function main() {
-  const api = new RippleAPI({ server: "wss://s.altnet.rippletest.net:51233" });
+// Generate a new Testnet key pair
+const keyPair = keypairs.deriveKeypair(keypairs.generateSeed());
 
-  try {
-    await api.connect();
-    console.log("Connected to Testnet");
+// Convert the key pair to a Testnet address
+const testnetAddress = keypairs.deriveAddress(keyPair.publicKey);
 
-    const wallet = api.generateXAddress();
-    console.log("Generated Testnet account:");
-    console.log("Address:", wallet.address);
-    console.log("Secret:", wallet.secret);
-  } catch (error) {
-    console.error("Error:", error);
-  } finally {
-    api.disconnect();
-  }
-}
+// Encode the secret key
+const testnetSecret = rippleBinaryCodec.encodeForSigning({
+  signingPublicKey: keyPair.publicKey,
+  signature: keyPair.privateKey,
+});
 
-main();
+console.log("Testnet Address:", testnetAddress);
+console.log("Testnet Secret:", testnetSecret);
